@@ -21,32 +21,24 @@ class AmazingNumber {
             throw new NotNaturalNumber();
         printInfo();
     }
-    private String parity() {
-        return "This number is " +
-                (num % 2 == 0 ? "Even." : "Odd.");
+    private boolean evenChecker() {
+        return num % 2 == 0;
     }
-    private String buzzChecker() {
-        boolean isBuzz;
-        String explanation = String.format("Explanation:%n");
-        if (num % 7 == 0 || num % 10 == 7) {
-            isBuzz = true;
-            if (num % 7 == 0 && num % 10 == 7) {
-                explanation += String.format("%d is divisible by 7 and ends with 7.", num);
-            } else if (num % 7 == 0) {
-                explanation += String.format("%d is divisible by 7.", num);
-            } else {
-                explanation += String.format("%d ends with 7.", num);
-            }
-        } else {
-            isBuzz = false;
-            explanation += String.format("%d is neither divisible by 7 nor does it end with 7.", num);
-        }
-        return String.format("It is%s a Buzz number.%n%s",
-                isBuzz ? "" : " not", explanation);
+    private boolean buzzChecker() {
+        return num % 7 == 0 || num % 10 == 7;
+    }
+    private boolean duckChecker() {
+        return Integer.toString(num).contains("0");
+    }
+    private String formatProperty(String name, boolean value) {
+        return String.format("%12s: %s", name, value);
     }
     private void printInfo() {
-        System.out.println(parity());
-        System.out.println(buzzChecker());
+        System.out.printf("Properties of %d%n", num);
+        System.out.println(formatProperty("even", evenChecker()));
+        System.out.println(formatProperty("odd", !evenChecker()));
+        System.out.println(formatProperty("buzz", buzzChecker()));
+        System.out.println(formatProperty("duck", duckChecker()));
     }
 }
 public class Main {
