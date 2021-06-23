@@ -3,11 +3,6 @@ package numbers;
 import java.util.*;
 
 abstract class NumCheck {
-    final String name;
-
-    public NumCheck(String name) {
-        this.name = name;
-    }
     abstract boolean checkNumber(long number);
 }
 class NumException extends Throwable {
@@ -24,43 +19,43 @@ class NumException extends Throwable {
 class AmazingNumber {
     private final Scanner sc;
     private long num;
-    private final List<NumCheck> checkers;
+    private final HashMap<String, NumCheck> checkers;
     public AmazingNumber(Scanner sc) {
         this.sc = sc;
-        checkers = new ArrayList<>() {
+        checkers = new HashMap<>() {
             {
-                add(new NumCheck("even") {
+                put("EVEN", new NumCheck() {
                     @Override
                     public boolean checkNumber(long number) {
                         return number % 2 == 0;
                     }
                 });
-                add(new NumCheck("odd") {
+                put("ODD", new NumCheck() {
                     @Override
                     public boolean checkNumber(long number) {
                         return number % 2 == 1;
                     }
                 });
-                add(new NumCheck("buzz") {
+                put("BUZZ", new NumCheck() {
                     @Override
                     public boolean checkNumber(long number) {
                         return number % 7 == 0 || number % 10 == 7;
                     }
                 });
-                add(new NumCheck("duck") {
+                put("DUCK", new NumCheck() {
                     @Override
                     public boolean checkNumber(long number) {
                         return Long.toString(number).contains("0");
                     }
                 });
-                add(new NumCheck("palindromic") {
+                put("PALINDROMIC", new NumCheck() {
                     @Override
                     public boolean checkNumber(long number) {
                         StringBuilder sb = new StringBuilder(Long.toString(number));
                         return sb.toString().equals(sb.reverse().toString());
                     }
                 });
-                add(new NumCheck("gapful") {
+                put("GAPFUL", new NumCheck() {
                     @Override
                     boolean checkNumber(long number) {
                         String str = Long.toString(number);
@@ -123,15 +118,15 @@ class AmazingNumber {
 
         return -1;
     }
-    private void formatProperty(NumCheck check) {
-        System.out.printf("%12s: %s%n", check.name, check.checkNumber(num));
+    private void formatProperty(String name, NumCheck check) {
+        System.out.printf("%12s: %s%n", name, check.checkNumber(num));
     }
     private void printInfoDouble(long up) {
         for (long i = 0; i < up; i++) {
             List<String> strings = new ArrayList<>();
-            for (NumCheck check : checkers) {
-                if (check.checkNumber(num)) {
-                    strings.add(check.name);
+            for (String check : checkers.keySet()) {
+                if (checkers.get(check).checkNumber(num)) {
+                    strings.add(check);
                 }
             }
             String accepted = strings.toString();
