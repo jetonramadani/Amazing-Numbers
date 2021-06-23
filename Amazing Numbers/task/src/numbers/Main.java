@@ -1,54 +1,109 @@
 package numbers;
 
-import java.util.Scanner;
+import java.util.*;
 
+abstract class NumCheck {
+    String name;
+
+    public NumCheck(String name) {
+        this.name = name;
+    }
+    abstract void checkNumber(long number);
+}
 class NotNaturalNumber extends Throwable {
     @Override
     public String getMessage() {
-        return "This number is not natural!";
+        return "The first parameter should be a natural number or zero.";
     }
 }
 
 class AmazingNumber {
-    private final int num;
+    private long num;
     private final Scanner sc;
-
-    public AmazingNumber(Scanner sc) throws NotNaturalNumber {
+    List<NumCheck> checkers;
+    public AmazingNumber(Scanner sc) {
         this.sc = sc;
-        System.out.println("Enter a natural number:");
-        num = sc.nextInt();
-        if (num <= 0)
-            throw new NotNaturalNumber();
+        checkers = new ArrayList<>() {
+            {
+                add(new NumCheck("even") {
+                    @Override
+                    public void checkNumber(long number) {
+                        formatProperty(name, number % 2 == 0);
+                    }
+                });
+                add(new NumCheck("odd") {
+                    @Override
+                    public void checkNumber(long number) {
+                        formatProperty(name, number % 2 == 1);
+                    }
+                });
+                add(new NumCheck("buzz") {
+                    @Override
+                    public void checkNumber(long number) {
+                        formatProperty(name, number % 7 == 0 || number % 10 == 7);
+                    }
+                });
+                add(new NumCheck("duck") {
+                    @Override
+                    public void checkNumber(long number) {
+                        formatProperty(name, Long.toString(number).contains("0"));
+                    }
+                });
+                add(new NumCheck("palindromic") {
+                    @Override
+                    public void checkNumber(long number) {
+                        StringBuilder sb = new StringBuilder(Long.toString(number));
+                        formatProperty(name, sb.toString().equals(sb.reverse().toString()));
+                    }
+                });
+            }
+        };
         printInfo();
     }
-    private boolean evenChecker() {
-        return num % 2 == 0;
+    private void printWelcome() {
+        System.out.println("Welcome to Amazing Numbers!\n" +
+                "\n" +
+                "Supported requests:\n" +
+                "- enter a natural number to know its properties;\n" +
+                "- enter 0 to exit.");
     }
-    private boolean buzzChecker() {
-        return num % 7 == 0 || num % 10 == 7;
+    private boolean processRequest() throws NotNaturalNumber {
+        System.out.println("Enter a request:");
+        this.num = sc.nextLong();
+        if (num < 0) {
+            throw new NotNaturalNumber();
+        }
+        else if (num == 0) {
+            return false;
+        }
+        printInfo();
+        return true;
     }
-    private boolean duckChecker() {
-        return Integer.toString(num).contains("0");
-    }
-    private String formatProperty(String name, boolean value) {
-        return String.format("%12s: %s", name, value);
+    private void formatProperty(String name, boolean value) {
+        System.out.printf("%12s: %s%n", name, value);
     }
     private void printInfo() {
         System.out.printf("Properties of %d%n", num);
-        System.out.println(formatProperty("even", evenChecker()));
-        System.out.println(formatProperty("odd", !evenChecker()));
-        System.out.println(formatProperty("buzz", buzzChecker()));
-        System.out.println(formatProperty("duck", duckChecker()));
+        checkers.forEach(obj -> obj.checkNumber(num));
+    }
+    public void run(){
+        printWelcome();
+        boolean req = true;
+        do {
+            try {
+                req = processRequest();
+            } catch (NotNaturalNumber e) {
+                System.out.println(e.getMessage());
+            }
+        } while (req);
+        System.out.println("Goodbye!");
     }
 }
 public class Main {
     public static void main(String[] args) {
 //        write your code here
         Scanner sc = new Scanner(System.in);
-        try {
-            AmazingNumber number = new AmazingNumber(sc);
-        } catch (NotNaturalNumber e) {
-            System.out.println(e.getMessage());
-        }
+        AmazingNumber number = new AmazingNumber(sc);
+        number.run();
     }
 }
