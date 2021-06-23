@@ -3,99 +3,157 @@ package numbers;
 import java.util.*;
 
 abstract class NumCheck {
-    String name;
+    final String name;
 
     public NumCheck(String name) {
         this.name = name;
     }
-    abstract void checkNumber(long number);
+    abstract boolean checkNumber(long number);
 }
-class NotNaturalNumber extends Throwable {
+class NumException extends Throwable {
+    String str;
+    NumException(String str) {
+        this.str = str;
+    }
     @Override
     public String getMessage() {
-        return "The first parameter should be a natural number or zero.";
+        return str;
     }
 }
 
 class AmazingNumber {
-    private long num;
     private final Scanner sc;
-    List<NumCheck> checkers;
+    private long num;
+    private final List<NumCheck> checkers;
     public AmazingNumber(Scanner sc) {
         this.sc = sc;
         checkers = new ArrayList<>() {
             {
                 add(new NumCheck("even") {
                     @Override
-                    public void checkNumber(long number) {
-                        formatProperty(name, number % 2 == 0);
+                    public boolean checkNumber(long number) {
+                        return number % 2 == 0;
                     }
                 });
                 add(new NumCheck("odd") {
                     @Override
-                    public void checkNumber(long number) {
-                        formatProperty(name, number % 2 == 1);
+                    public boolean checkNumber(long number) {
+                        return number % 2 == 1;
                     }
                 });
                 add(new NumCheck("buzz") {
                     @Override
-                    public void checkNumber(long number) {
-                        formatProperty(name, number % 7 == 0 || number % 10 == 7);
+                    public boolean checkNumber(long number) {
+                        return number % 7 == 0 || number % 10 == 7;
                     }
                 });
                 add(new NumCheck("duck") {
                     @Override
-                    public void checkNumber(long number) {
-                        formatProperty(name, Long.toString(number).contains("0"));
+                    public boolean checkNumber(long number) {
+                        return Long.toString(number).contains("0");
                     }
                 });
                 add(new NumCheck("palindromic") {
                     @Override
-                    public void checkNumber(long number) {
+                    public boolean checkNumber(long number) {
                         StringBuilder sb = new StringBuilder(Long.toString(number));
-                        formatProperty(name, sb.toString().equals(sb.reverse().toString()));
+                        return sb.toString().equals(sb.reverse().toString());
+                    }
+                });
+                add(new NumCheck("gapful") {
+                    @Override
+                    boolean checkNumber(long number) {
+                        String str = Long.toString(number);
+                        if (str.length() < 3) {
+                            return false;
+                        } else {
+                            long num = Long.parseLong(str.charAt(0) + ""
+                                    + str.charAt(str.length() - 1));
+                            return number % num == 0;
+                        }
                     }
                 });
             }
         };
-        printInfo();
     }
-    private void printWelcome() {
-        System.out.println("Welcome to Amazing Numbers!\n" +
-                "\n" +
+    private void printRules() {
+        System.out.println("\n" +
                 "Supported requests:\n" +
                 "- enter a natural number to know its properties;\n" +
-                "- enter 0 to exit.");
+                "- enter two natural numbers to obtain the properties of the list:\n" +
+                "  * the first parameter represents a starting number;\n" +
+                "  * the second parameters show how many consecutive numbers are to be processed;\n" +
+                "- separate the parameters with one space;\n" +
+                "- enter 0 to exit.\n");
     }
-    private boolean processRequest() throws NotNaturalNumber {
+    private byte processRequest() throws NumException {
         System.out.println("Enter a request:");
-        this.num = sc.nextLong();
-        if (num < 0) {
-            throw new NotNaturalNumber();
+        String str = sc.nextLine();
+        if (str.trim().length() == 0) {
+            printRules();
+            return -1;
         }
-        else if (num == 0) {
-            return false;
+        String[] parts = str.split("\\s+");
+        try {
+            num = Long.parseLong(parts[0]);
+            if (num < 0) {
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            throw new NumException("The first parameter should be a natural number or zero.");
         }
-        printInfo();
-        return true;
+        if (num == 0) {
+            return 0;
+        }
+        if (parts.length == 1) {
+            printInfoSingle();
+            return 1;
+        } else if (parts.length == 2) {
+            try {
+                long n2 = Long.parseLong(parts[1]);
+                if (n2 < 0) {
+                    throw new Exception();
+                }
+                printInfoDouble(n2);
+            } catch (Exception e) {
+                throw new NumException("The second parameter should be a natural number.");
+            }
+            return 2;
+        }
+
+        return -1;
     }
-    private void formatProperty(String name, boolean value) {
-        System.out.printf("%12s: %s%n", name, value);
+    private void formatProperty(NumCheck check) {
+        System.out.printf("%12s: %s%n", check.name, check.checkNumber(num));
     }
-    private void printInfo() {
+    private void printInfoDouble(long up) {
+        for (long i = 0; i < up; i++) {
+            List<String> strings = new ArrayList<>();
+            for (NumCheck check : checkers) {
+                if (check.checkNumber(num)) {
+                    strings.add(check.name);
+                }
+            }
+            String accepted = strings.toString();
+            System.out.println(num + " is " + accepted.substring(1, accepted.length() - 1));
+            ++num;
+        }
+    }
+    private void printInfoSingle() {
         System.out.printf("Properties of %d%n", num);
-        checkers.forEach(obj -> obj.checkNumber(num));
+        checkers.forEach(this::formatProperty);
     }
     public void run(){
-        printWelcome();
-        boolean req = true;
+        System.out.println("Welcome to Amazing Numbers!");
+        printRules();
+        byte req = -1;
         do {
             try {
                 req = processRequest();
-            } catch (NotNaturalNumber e) {
+            } catch (NumException e) {
                 System.out.println(e.getMessage());
             }
-        } while (req);
+        } while (req != 0);
         System.out.println("Goodbye!");
     }
 }
