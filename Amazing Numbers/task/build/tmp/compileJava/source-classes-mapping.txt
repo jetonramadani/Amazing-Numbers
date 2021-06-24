@@ -8,6 +8,8 @@ numbers/Main.java
  numbers.AmazingNumber$1$5
  numbers.AmazingNumber$1$6
  numbers.AmazingNumber$1$7
+ numbers.AmazingNumber$1$8
+ numbers.AmazingNumber$1$9
  numbers.Main
  numbers.NumCheck
  numbers.NumException

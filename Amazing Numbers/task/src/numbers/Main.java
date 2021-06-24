@@ -83,16 +83,31 @@ class AmazingNumber {
                         return sum == product;
                     }
                 });
+                put("SQUARE", new NumCheck() {
+                    @Override
+                    boolean checkNumber(long number) {
+                        double res = Math.sqrt(number);
+                        return res == Math.floor(res);
+                    }
+                });
+                put("SUNNY", new NumCheck() {
+                    @Override
+                    boolean checkNumber(long number) {
+                        double res = Math.sqrt(number + 1);
+                        return res == Math.floor(res);
+                    }
+                });
             }
         };
     }
     private void printRules() {
         System.out.println("Supported requests:\n" +
-                "- enter a natural number to know its properties;\n" +
+                "- enter a natural number to know its properties; \n" +
                 "- enter two natural numbers to obtain the properties of the list:\n" +
                 "  * the first parameter represents a starting number;\n" +
                 "  * the second parameter shows how many consecutive numbers are to be printed;\n" +
                 "- two natural numbers and a property to search for;\n" +
+                "- two natural numbers and two properties to search for;\n" +
                 "- separate the parameters with one space;\n" +
                 "- enter 0 to exit.");
     }
@@ -128,7 +143,8 @@ class AmazingNumber {
                     printInfoDouble(n2);
                 } else {
                     printContainsOrNot(n2, Arrays.stream(parts)
-                            .skip(2).toArray(String[]::new));
+                            .skip(2).distinct()
+                            .toArray(String[]::new));
                 }
             } catch (Exception e) {
                 throw new NumException("The second parameter should be a natural number.");
@@ -158,14 +174,61 @@ class AmazingNumber {
             ++num;
         }
     }
+    private void throwMutuallyExclusive(byte state, int type) throws NumException {
+        StringBuilder sb = new StringBuilder("The request contains mutually exclusive properties: ");
+        if (state == 2) {
+            switch (type) {
+                case 1:
+                    sb.append("[ODD, EVEN]\n");
+                    break;
+                case 2:
+                    sb.append("[DUCK, SPY]\n");
+                    break;
+                case 3:
+                    sb.append("[SUNNY SQUARE]");
+                    break;
+            }
+            sb.append("There are no numbers with these properties.");
+            throw new NumException(sb.toString());
+        }
+    }
     private void printContainsOrNot(long total, String ...constraints) throws NumException {
-        if (!checkers.containsKey(constraints[0])) {
-            throw new NumException("The property [" + constraints[0] + "] is wrong.\n" +
-                    "Available properties: " + checkers.keySet());
+        List<String> wrong = new ArrayList<>();
+        byte[] states = new byte[3];
+        for (String s : constraints) {
+            if (!checkers.containsKey(s)) {
+                wrong.add(s);
+            }
+            if (s.matches("EVEN") || s.matches("ODD")) {
+                ++states[0];
+            } else if (s.matches("DUCK") || s.matches("SPY")) {
+                ++states[1];
+            } else if (s.matches("SUNNY") || s.matches("SQUARE")) {
+                ++states[2];
+            }
+        }
+        if (wrong.size() != 0) {
+            if (wrong.size() == 1) {
+                throw new NumException("The property [" + wrong + "] is wrong.\n" +
+                        "Available properties: " + checkers.keySet());
+            } else {
+                throw new NumException("The properties [" + wrong + "] are wrong.\n" +
+                        "Available properties: " + checkers.keySet());
+            }
+        }
+        for (int i = 0; i < states.length; i++) {
+            throwMutuallyExclusive(states[i], i);
         }
         int count = 1;
         while (count <= total) {
-            if (checkers.get(constraints[0]).checkNumber(num)) {
+            boolean flag = true;
+            for (String s : constraints) {
+                flag = checkers.get(s).checkNumber(num);
+                if (!flag) {
+                    break;
+                }
+            }
+            if (flag) {
                 printDoubleOrMoreFormatted(getOkayDoubleOrMore());
                 ++count;
             }
