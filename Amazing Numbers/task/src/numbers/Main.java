@@ -1,6 +1,8 @@
 package numbers;
 
 import java.util.*;
+import java.util.function.LongBinaryOperator;
+import java.util.stream.LongStream;
 
 abstract class NumCheck {
     abstract boolean checkNumber(long number);
@@ -68,22 +70,35 @@ class AmazingNumber {
                         }
                     }
                 });
+                put("SPY", new NumCheck() {
+                    @Override
+                    boolean checkNumber(long number) {
+                        long sum = 0L;
+                        long product = 1L;
+                        for (char ch : String.valueOf(number).toCharArray()) {
+                            int num = ch - '0';
+                            sum += num;
+                            product *= num;
+                        }
+                        return sum == product;
+                    }
+                });
             }
         };
     }
     private void printRules() {
-        System.out.println("\n" +
-                "Supported requests:\n" +
+        System.out.println("Supported requests:\n" +
                 "- enter a natural number to know its properties;\n" +
                 "- enter two natural numbers to obtain the properties of the list:\n" +
                 "  * the first parameter represents a starting number;\n" +
-                "  * the second parameters show how many consecutive numbers are to be processed;\n" +
+                "  * the second parameter shows how many consecutive numbers are to be printed;\n" +
+                "- two natural numbers and a property to search for;\n" +
                 "- separate the parameters with one space;\n" +
-                "- enter 0 to exit.\n");
+                "- enter 0 to exit.");
     }
     private byte processRequest() throws NumException {
         System.out.println("Enter a request:");
-        String str = sc.nextLine();
+        String str = sc.nextLine().toUpperCase();
         if (str.trim().length() == 0) {
             printRules();
             return -1;
@@ -103,36 +118,60 @@ class AmazingNumber {
         if (parts.length == 1) {
             printInfoSingle();
             return 1;
-        } else if (parts.length == 2) {
+        } else {
             try {
                 long n2 = Long.parseLong(parts[1]);
                 if (n2 < 0) {
                     throw new Exception();
                 }
-                printInfoDouble(n2);
+                if (parts.length == 2) {
+                    printInfoDouble(n2);
+                } else {
+                    printContainsOrNot(n2, Arrays.stream(parts)
+                            .skip(2).toArray(String[]::new));
+                }
             } catch (Exception e) {
                 throw new NumException("The second parameter should be a natural number.");
             }
             return 2;
         }
 
-        return -1;
     }
     private void formatProperty(String name, NumCheck check) {
         System.out.printf("%12s: %s%n", name, check.checkNumber(num));
     }
+    private void printDoubleOrMoreFormatted(String accepted) {
+        System.out.println(num + " is " + accepted.substring(1, accepted.length() - 1));
+    }
+    private String getOkayDoubleOrMore() {
+        List<String> strings = new ArrayList<>();
+        for (String check : checkers.keySet()) {
+            if (checkers.get(check).checkNumber(num)) {
+                strings.add(check);
+            }
+        }
+        return strings.toString();
+    }
     private void printInfoDouble(long up) {
         for (long i = 0; i < up; i++) {
-            List<String> strings = new ArrayList<>();
-            for (String check : checkers.keySet()) {
-                if (checkers.get(check).checkNumber(num)) {
-                    strings.add(check);
-                }
-            }
-            String accepted = strings.toString();
-            System.out.println(num + " is " + accepted.substring(1, accepted.length() - 1));
+            printDoubleOrMoreFormatted(getOkayDoubleOrMore());
             ++num;
         }
+    }
+    private void printContainsOrNot(long total, String ...constraints) throws NumException {
+        if (!checkers.containsKey(constraints[0])) {
+            throw new NumException("The property [" + constraints[0] + "] is wrong.\n" +
+                    "Available properties: " + checkers.keySet());
+        }
+        int count = 1;
+        while (count <= total) {
+            if (checkers.get(constraints[0]).checkNumber(num)) {
+                printDoubleOrMoreFormatted(getOkayDoubleOrMore());
+                ++count;
+            }
+            ++num;
+        }
+
     }
     private void printInfoSingle() {
         System.out.printf("Properties of %d%n", num);
