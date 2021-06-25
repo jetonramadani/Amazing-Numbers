@@ -2,6 +2,7 @@ numbers/Main.java
  numbers.AmazingNumber
  numbers.AmazingNumber$1
  numbers.AmazingNumber$1$1
+ numbers.AmazingNumber$1$10
  numbers.AmazingNumber$1$2
  numbers.AmazingNumber$1$3
  numbers.AmazingNumber$1$4
