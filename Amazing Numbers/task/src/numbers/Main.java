@@ -22,6 +22,7 @@ class AmazingNumber {
     private final Scanner sc;
     private long num;
     private final HashMap<String, NumCheck> checkers;
+    private final HashMap<String, String> mutuallyExclusive;
     public AmazingNumber(Scanner sc) {
         this.sc = sc;
         checkers = new HashMap<>() {
@@ -115,8 +116,44 @@ class AmazingNumber {
                         return true;
                     }
                 });
+                put("HAPPY", new NumCheck() {
+                    @Override
+                    boolean checkNumber(long number) {
+                        return checkHappy(number);
+                    }
+                });
+                put("SAD", new NumCheck() {
+                    @Override
+                    boolean checkNumber(long number) {
+                        return !checkHappy(number);
+                    }
+                });
             }
         };
+        mutuallyExclusive = new HashMap<>() {
+            {
+                put("EVEN", "ODD");
+                put("DUCK", "SPY");
+                put("SUNNY", "SQUARE");
+                put("SAD", "HAPPY");
+                put("ODD", "EVEN");
+                put("SPY", "DUCK");
+                put("SQUARE", "SUNNY");
+                put("HAPPY", "SAD");
+            }
+        };
+    }
+    private boolean checkHappy(long number) {
+        do {
+            long sum = 0;
+            while (number != 0) {
+                long last = number % 10;
+                sum += last * last;
+                number /= 10;
+            }
+            number = sum;
+        } while (number > 9);
+        return number == 1;
     }
     private void printRules() {
         System.out.println("Supported requests:\n" +
@@ -125,6 +162,7 @@ class AmazingNumber {
                 "  * the first parameter represents a starting number;\n" +
                 "  * the second parameter shows how many consecutive numbers are to be printed;\n" +
                 "- two natural numbers and properties to search for;\n" +
+                "- a property preceded by minus must not be present in numbers;\n" +
                 "- separate the parameters with one space;\n" +
                 "- enter 0 to exit.");
     }
@@ -191,37 +229,56 @@ class AmazingNumber {
             ++num;
         }
     }
-    private void throwMutuallyExclusive(byte state, int type) throws NumException {
-        StringBuilder sb = new StringBuilder("The request contains mutually exclusive properties: ");
-        if (state == 2) {
-            switch (type) {
-                case 1:
-                    sb.append("[ODD, EVEN]\n");
-                    break;
-                case 2:
-                    sb.append("[DUCK, SPY]\n");
-                    break;
-                case 3:
-                    sb.append("[SUNNY SQUARE]");
-                    break;
+    private void MutualExclusiveThrower(String first, String second) throws NumException {
+        throw new NumException(String.format("The request contains mutually exclusive properties: [%s, %s]\n" +
+                "There are no numbers with these properties", first, second));
+    }
+    private boolean contains (String[] constraints, String item) {
+        for(String s : constraints) {
+            if(s.equals(item)) {
+                return true;
             }
-            sb.append("There are no numbers with these properties.");
-            throw new NumException(sb.toString());
+        }
+        return false;
+    }
+    private void mutualChecker(String[] constraints) throws NumException {
+        for (String s : constraints) {
+            if (s.startsWith("-")) {
+                String withoutNegation = s.substring(1);
+                if (contains(constraints, withoutNegation)) {
+                    MutualExclusiveThrower(s, withoutNegation);
+                }
+                if (mutuallyExclusive.containsKey(withoutNegation)) {
+                    String mutualExcl = "-" + mutuallyExclusive.get(withoutNegation);
+                    if (contains(constraints, mutualExcl)) {
+                        MutualExclusiveThrower(s, mutualExcl);
+                    }
+                }
+            } else {
+                if (contains(constraints, "-" + s)) {
+                    MutualExclusiveThrower(s, "-" + s);
+                }
+                if (mutuallyExclusive.containsKey(s)) {
+                    String mutualExcl = mutuallyExclusive.get(s);
+                    if (contains(constraints, mutualExcl)) {
+                        MutualExclusiveThrower(s, mutualExcl);
+                    }
+                }
+            }
         }
     }
     private void printContainsOrNot(long total, String ...constraints) throws NumException {
         List<String> wrong = new ArrayList<>();
-        byte[] states = new byte[3];
+
         for (String s : constraints) {
-            if (!checkers.containsKey(s)) {
-                wrong.add(s);
-            }
-            if (s.matches("EVEN") || s.matches("ODD")) {
-                ++states[0];
-            } else if (s.matches("DUCK") || s.matches("SPY")) {
-                ++states[1];
-            } else if (s.matches("SUNNY") || s.matches("SQUARE")) {
-                ++states[2];
+            if (s.startsWith("-")) {
+                if (!checkers.containsKey(s.substring(1))) {
+                    wrong.add(s);
+                }
+            } else {
+                if (!checkers.containsKey(s)) {
+                    wrong.add(s);
+                }
             }
         }
         if (wrong.size() != 0) {
@@ -233,14 +290,16 @@ class AmazingNumber {
                         "Available properties: " + checkers.keySet());
             }
         }
-        for (int i = 0; i < states.length; i++) {
-            throwMutuallyExclusive(states[i], i);
-        }
+        mutualChecker(constraints);
         int count = 1;
         while (count <= total) {
             boolean flag = true;
             for (String s : constraints) {
-                flag = checkers.get(s).checkNumber(num);
+                if (s.startsWith("-")) {
+                    flag = !checkers.get(s.substring(1)).checkNumber(num);
+                } else {
+                    flag = checkers.get(s).checkNumber(num);
+                }
                 if (!flag) {
                     break;
                 }
