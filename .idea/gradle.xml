@@ -26,6 +26,14 @@
             <option value="$PROJECT_DIR$/Topics/Defining classes/Points on the 2D plane" />
             <option value="$PROJECT_DIR$/Topics/Defining classes/Representing time as a class" />
             <option value="$PROJECT_DIR$/Topics/Defining classes/Theory" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Car" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Circle" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Complex numbers" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Counter" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/In a box" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Patient needs a doctor" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Simulating a clock" />
+            <option value="$PROJECT_DIR$/Topics/Instance methods/Theory" />
             <option value="$PROJECT_DIR$/Topics/Objects/Army" />
             <option value="$PROJECT_DIR$/Topics/Objects/Change identities" />
             <option value="$PROJECT_DIR$/Topics/Objects/Preparing full name" />
@@ -46,6 +54,8 @@
             <option value="$PROJECT_DIR$/Topics/Processing strings/The lucky ticket" />
             <option value="$PROJECT_DIR$/Topics/Processing strings/The percentage of G and C characters" />
             <option value="$PROJECT_DIR$/Topics/Processing strings/Theory" />
+            <option value="$PROJECT_DIR$/Topics/Static members/Theory" />
+            <option value="$PROJECT_DIR$/Topics/Static members/Too many cats" />
             <option value="$PROJECT_DIR$/Topics/StringBuilder/Concat all strings without digits" />
             <option value="$PROJECT_DIR$/Topics/StringBuilder/The English alphabet" />
             <option value="$PROJECT_DIR$/Topics/StringBuilder/Theory" />
