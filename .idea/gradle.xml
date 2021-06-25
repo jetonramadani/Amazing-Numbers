@@ -12,6 +12,13 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Amazing Numbers/task" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Account" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Account and its owner" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Book" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Complex numbers" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Geometric cube" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/Theory" />
+            <option value="$PROJECT_DIR$/Topics/Constructor/User" />
             <option value="$PROJECT_DIR$/Topics/Defining classes/Accounts" />
             <option value="$PROJECT_DIR$/Topics/Defining classes/Books" />
             <option value="$PROJECT_DIR$/Topics/Defining classes/Complex numbers" />
